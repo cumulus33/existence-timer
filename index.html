@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXISTENCE TIMER</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        h1 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        .timer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .time-value {
+            font-size: 2em;
+            font-weight: 300;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border: 1px solid #ddd;
+        }
+        .time-label {
+            font-size: 0.7em;
+            color: #999;
+            margin-top: 5px;
+        }
+        #customizeBtn {
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+        #customizeBtn:hover {
+            color: #666;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.9);
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 300px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 0.9em;
+            font-weight: 300;
+        }
+        input::placeholder {
+            color: #999;
+            text-transform: uppercase;
+        }
+        .date-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .date-inputs input {
+            width: 33%;
+            text-align: center;
+        }
+        #confirmBtn {
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 300;
+            text-transform: uppercase;
+            margin-top: 10px;
+            align-self: center;
+        }
+        #confirmBtn:hover {
+            color: #666;
+        }
+        #errorMsg {
+            color: #ff0000;
+            font-size: 0.8em;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">CUMULUS IN EARTH</h1>
+        <div class="timer" id="timer"></div>
+    </div>
+
+    <button id="customizeBtn">MAKE MY OWN</button>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <form id="userForm">
+                <input type="text" id="nickname" placeholder="Enter your nickname" required>
+                <div class="date-inputs">
+                    <input type="text" id="yearInput" placeholder="YYYY" maxlength="4" pattern="\d{4}" required>
+                    <input type="text" id="monthInput" placeholder="MM" maxlength="2" pattern="\d{1,2}" required>
+                    <input type="text" id="dayInput" placeholder="DD" maxlength="2" pattern="\d{1,2}" required>
+                </div>
+                <div id="errorMsg"></div>
+                <button type="submit" id="confirmBtn">CONFIRM</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let birthDate = new Date('1996-12-04T12:00:00');
+        let timerInterval;
+        const timeUnits = [
+            { unit: 'YEARS', label: 'Y' },
+            { unit: 'MONTHS', label: 'M' },
+            { unit: 'DAYS', label: 'D' },
+            { unit: 'HOURS', label: 'H' },
+            { unit: 'MINUTES', label: 'M' },
+            { unit: 'SECONDS', label: 'S' }
+        ];
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - birthDate;
+
+            const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+            const months = Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44));
+            const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 30.44)) / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const values = [years, months, days, hours, minutes, seconds];
+
+            document.getElementById('timer').innerHTML = timeUnits.map((unit, index) => `
+                <div class="time-unit">
+                    <div class="time-value">${values[index].toString().padStart(2, '0')}</div>
+                    <div class="time-label">${unit.label}</div>
+                </div>
+            `).join('');
+        }
+
+        const modal = document.getElementById('customModal');
+        const btn = document.getElementById('customizeBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+            errorMsg.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function isValidDate(year, month, day) {
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() == year && date.getMonth() == month - 1 && date.getDate() == day;
+        }
+
+        // Input validation
+        document.getElementById('yearInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        document.getElementById('monthInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+            if (this.value > 12) this.value = 12;
+        });
+
+        document.getElementById('dayInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+            if (this.value > 31) this.value = 31;
+        });
+
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nickname = document.getElementById('nickname').value.toUpperCase();
+            const year = parseInt(document.getElementById('yearInput').value);
+            const month = parseInt(document.getElementById('monthInput').value);
+            const day = parseInt(document.getElementById('dayInput').value);
+
+            if (isValidDate(year, month, day)) {
+                birthDate = new Date(year, month - 1, day);
+                document.getElementById('title').textContent = `${nickname} IN EARTH`;
+                modal.style.display = "none";
+                errorMsg.style.display = "none";
+
+                clearInterval(timerInterval);
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+            } else {
+                errorMsg.textContent = "PLEASE ENTER A VALID DATE";
+                errorMsg.style.display = "block";
+            }
+        });
+
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>
